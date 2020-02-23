@@ -1,0 +1,6 @@
+linters:
+  enable-all: false
+  enable:
+  - gofmt
+  - megacheck
+  - govet

@@ -1,0 +1,30 @@
+version: '3.1'
+
+volumes:
+  zookeeper_data:
+    external: true
+  cassandra_data:
+    external: true
+  kafka_data:
+    external: true
+
+services:
+  producer:
+    image: golang:1.11.3-alpine3.8
+    env_file:
+    - docker-compose.env
+    volumes:
+    - .:/go/src/github.com/ic2hrmk/azck/
+    working_dir: /go/src/github.com/ic2hrmk/azck/
+    command: go run ./entry/entry.go --kind=producer
+    restart: always
+
+  consumer:
+    image: golang:1.11.3-alpine3.8
+    env_file:
+    - docker-compose.env
+    volumes:
+    - .:/go/src/github.com/ic2hrmk/azck/
+    working_dir: /go/src/github.com/ic2hrmk/azck/
+    command: go run ./entry/entry.go --kind=consumer
+    restart: always

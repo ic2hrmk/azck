@@ -1,2 +1,9 @@
+# System directories
 .idea
 vendor
+
+# Binary
+azck
+
+# Developer's configuration
+.env
