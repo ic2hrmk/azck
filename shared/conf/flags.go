@@ -17,4 +17,3 @@ func LoadFlags() *Flags {
 
 	return flags
 }
-

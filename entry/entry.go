@@ -7,10 +7,11 @@ import (
 	"github.com/ic2hrmk/azck/app/services/producer"
 	"github.com/ic2hrmk/azck/registry"
 	"github.com/ic2hrmk/azck/shared/conf"
+	"github.com/ic2hrmk/azck/shared/runner"
 )
 
-//go:generate go run entry.go --kind=producer --env=.env
-//go:generate go run entry.go --kind=consumer --env=.env
+//go:generate go run entry.go --kind=producer
+//go:generate go run entry.go --kind=consumer
 
 func main() {
 	//
@@ -28,7 +29,7 @@ func main() {
 
 	serviceFactory, err := reg.Get(flags.Kind)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to select service mode to run, %s", err)
 	}
 
 	//
@@ -36,12 +37,25 @@ func main() {
 	//
 	service, err := serviceFactory()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to create service, %s", err)
 	}
 
 	//
 	// Run till the death comes
 	//
 	log.Printf("service [%s] started!", flags.Kind)
-	log.Fatal(service.Run())
+
+	go func() { // Detach service main routine
+		if err := service.Run(); err != nil {
+			log.Fatalf("service stopped with critical error, %s", err)
+		}
+	}()
+
+	runner.AwaitShutdown()
+
+	if err = service.Stop(); err != nil {
+		log.Printf("error ocurred durring service stop procedure, %s", err)
+	}
+
+	log.Println("service stopped!")
 }

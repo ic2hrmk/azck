@@ -3,28 +3,48 @@ version: '3.1'
 volumes:
   zookeeper_data:
     external: true
+  zookeeper_datalog:
+    external: true
   cassandra_data:
     external: true
   kafka_data:
     external: true
 
 services:
-  producer:
-    image: golang:1.11.3-alpine3.8
-    env_file:
-    - docker-compose.env
-    volumes:
-    - .:/go/src/github.com/ic2hrmk/azck/
-    working_dir: /go/src/github.com/ic2hrmk/azck/
-    command: go run ./entry/entry.go --kind=producer
-    restart: always
+#  producer:
+#    image: golang:1.11.3-alpine3.8
+#    volumes:
+#    - .:/go/src/github.com/ic2hrmk/azck/
+#    working_dir: /go/src/github.com/ic2hrmk/azck/
+#    command: go run ./entry/entry.go --kind=producer
+#    restart: always
 
-  consumer:
-    image: golang:1.11.3-alpine3.8
-    env_file:
-    - docker-compose.env
-    volumes:
-    - .:/go/src/github.com/ic2hrmk/azck/
-    working_dir: /go/src/github.com/ic2hrmk/azck/
-    command: go run ./entry/entry.go --kind=consumer
+  #  consumer:
+  #    image: golang:1.11.3-alpine3.8
+  #    env_file:
+  #    - docker-compose.env
+  #    volumes:
+  #    - .:/go/src/github.com/ic2hrmk/azck/
+  #    working_dir: /go/src/github.com/ic2hrmk/azck/
+  #    command: go run ./entry/entry.go --kind=consumer
+  #    restart: always
+
+  zookeeper:
+    image: 'zookeeper:3.5.6'
+    ports:
+      - '2181:2181'
     restart: always
+    volumes:
+      - zookeeper_data:/data
+      - zookeeper_datalog:/datalog
+    env_file:
+      - docker-compose.env
+
+  zookeeper-ui:
+    image: 'elkozmon/zoonavigator:0.8.0'
+    ports:
+      - '9000:9000'
+    env_file:
+      - docker-compose.env
+    depends_on:
+      - zookeeper
